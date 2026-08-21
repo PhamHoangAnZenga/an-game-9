@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
@@ -13,9 +14,13 @@ public class NativeKeyboardController : MonoBehaviour
     [SerializeField] RectTransform _inputField;
     [SerializeField] TMP_InputField _inputFieldText;
 
+    float _width;
+    float _height;
+
     void Start()
     {
-        Debug.Log(TouchScreenKeyboard.isSupported);
+        _width = Screen.width;
+        _height = Screen.height;
         FixSafeArea();
     }
 
@@ -24,25 +29,31 @@ public class NativeKeyboardController : MonoBehaviour
         _inputFieldText.text = "";
     }
     
-    public void OnSelectInputField()
+    public async void OnSelectInputField()
     {
-        float width = Screen.width;
-        float height = Screen.height;
 
         float safeLeft = Screen.safeArea.x;
         float safeBottom = Screen.safeArea.y;
         float safeRight = safeLeft + Screen.safeArea.width;
         float safeTop = safeBottom + Screen.safeArea.height;
-
+                
         if (TouchScreenKeyboard.isSupported)
         {
+            while(!TouchScreenKeyboard.visible)
+            {
+                await Task.Yield();
+            }
+            while(!(TouchScreenKeyboard.area.height > 0) )
+            {
+                await Task.Yield();
+            }    
             safeBottom = TouchScreenKeyboard.area.height;
         }
 
-        float leftRatio = safeLeft / width;
-        float bottomRatio = safeBottom / height;
-        float rightRatio = (width - safeRight) / width;
-        float topRatio = (height - safeTop) / height;
+        float leftRatio = safeLeft / _width;
+        float bottomRatio = safeBottom / _height;
+        float rightRatio = (_width - safeRight) / _width;
+        float topRatio = (_height - safeTop) / _height;
 
         _safeArea.anchorMin = new Vector2(leftRatio, bottomRatio);
         _safeArea.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
@@ -52,26 +63,49 @@ public class NativeKeyboardController : MonoBehaviour
         _inputField.anchoredPosition = new Vector2(_inputField.anchoredPosition.x, 0);
     }
 
-    public void OnDeselectInputField()
+    public async void OnDeselectInputField()
     {
-        FixSafeArea();
-        _inputField.anchoredPosition = new Vector2(_inputField.anchoredPosition.x, 50);
-    }
-
-    void FixSafeArea()
-    {
-        float width = Screen.width;
-        float height = Screen.height;
 
         float safeLeft = Screen.safeArea.x;
         float safeBottom = Screen.safeArea.y;
         float safeRight = safeLeft + Screen.safeArea.width;
         float safeTop = safeBottom + Screen.safeArea.height;
+                
+        if (TouchScreenKeyboard.isSupported)
+        {
+            while(TouchScreenKeyboard.visible)
+            {
+                await Task.Yield();
+            }
+            while(TouchScreenKeyboard.area.height > 0.01f )
+            {
+                await Task.Yield();
+            }    
+        }
 
-        float leftRatio = safeLeft / width;
-        float bottomRatio = safeBottom / height;
-        float rightRatio = (width - safeRight) / width;
-        float topRatio = (height - safeTop) / height;
+        float leftRatio = safeLeft / _width;
+        float bottomRatio = safeBottom / _height;
+        float rightRatio = (_width - safeRight) / _width;
+        float topRatio = (_height - safeTop) / _height;
+
+        _safeArea.anchorMin = new Vector2(leftRatio, bottomRatio);
+        _safeArea.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
+
+        SetUnsafeArea(leftRatio, bottomRatio, rightRatio, topRatio);
+        _inputField.anchoredPosition = new Vector2(_inputField.anchoredPosition.x, 50);
+    }
+
+    void FixSafeArea()
+    {
+        float safeLeft = Screen.safeArea.x;
+        float safeBottom = Screen.safeArea.y;
+        float safeRight = safeLeft + Screen.safeArea.width;
+        float safeTop = safeBottom + Screen.safeArea.height;
+
+        float leftRatio = safeLeft / _width;
+        float bottomRatio = safeBottom / _height;
+        float rightRatio = (_width - safeRight) / _width;
+        float topRatio = (_height - safeTop) / _height;
 
         _safeArea.anchorMin = new Vector2(leftRatio, bottomRatio);
         _safeArea.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
