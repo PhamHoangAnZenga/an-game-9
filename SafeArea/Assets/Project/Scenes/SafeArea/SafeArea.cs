@@ -11,6 +11,7 @@ public class SafeArea : MonoBehaviour
 
     void Start()
     {
+        Debug.Log(TouchScreenKeyboard.isSupported);
         FixSafeArea();
     }
 
