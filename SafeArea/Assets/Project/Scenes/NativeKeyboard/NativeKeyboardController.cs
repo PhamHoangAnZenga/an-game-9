@@ -1,17 +1,17 @@
-using Unity.VisualScripting;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NativeKeyboardController : MonoBehaviour
 {
-    [SerializeField] RectTransform _rectTransform;
+    [SerializeField] RectTransform _safeArea;
 
     [SerializeField] RectTransform _topUnsafe;
     [SerializeField] RectTransform _bottomUnsafe;
     [SerializeField] RectTransform _leftUnsafe;
     [SerializeField] RectTransform _rightUnsafe;
 
-    [SerializeField] InputField _inputField;
+    [SerializeField] RectTransform _inputField;
+    [SerializeField] TMP_InputField _inputFieldText;
 
     void Start()
     {
@@ -19,7 +19,12 @@ public class NativeKeyboardController : MonoBehaviour
         FixSafeArea();
     }
 
-    public void OnOpenInputField()
+    public void OnEnter()
+    {
+        _inputFieldText.text = "";
+    }
+    
+    public void OnSelectInputField()
     {
         float width = Screen.width;
         float height = Screen.height;
@@ -39,17 +44,18 @@ public class NativeKeyboardController : MonoBehaviour
         float rightRatio = (width - safeRight) / width;
         float topRatio = (height - safeTop) / height;
 
-        _rectTransform.anchorMin = new Vector2(leftRatio, bottomRatio);
-        _rectTransform.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
+        _safeArea.anchorMin = new Vector2(leftRatio, bottomRatio);
+        _safeArea.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
 
         SetUnsafeArea(leftRatio, bottomRatio, rightRatio, topRatio);
 
-        
+        _inputField.anchoredPosition = new Vector2(_inputField.anchoredPosition.x, 0);
     }
-    
-    public void OnCloseInputField()
+
+    public void OnDeselectInputField()
     {
         FixSafeArea();
+        _inputField.anchoredPosition = new Vector2(_inputField.anchoredPosition.x, 50);
     }
 
     void FixSafeArea()
@@ -67,8 +73,8 @@ public class NativeKeyboardController : MonoBehaviour
         float rightRatio = (width - safeRight) / width;
         float topRatio = (height - safeTop) / height;
 
-        _rectTransform.anchorMin = new Vector2(leftRatio, bottomRatio);
-        _rectTransform.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
+        _safeArea.anchorMin = new Vector2(leftRatio, bottomRatio);
+        _safeArea.anchorMax = new Vector2(1 - rightRatio, 1 - topRatio);
 
         SetUnsafeArea(leftRatio, bottomRatio, rightRatio, topRatio);
 
@@ -76,7 +82,6 @@ public class NativeKeyboardController : MonoBehaviour
 
     void SetUnsafeArea(float leftRatio, float bottomRatio, float rightRatio, float topRatio)
     {
-        Debug.Log(leftRatio + " " + bottomRatio + " " + rightRatio + " " + topRatio);
         _leftUnsafe.anchorMax = new Vector2(leftRatio, 1);
         _leftUnsafe.anchorMin = new Vector2(0, 0);
 
